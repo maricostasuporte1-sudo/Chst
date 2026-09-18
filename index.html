@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050505" />
+  <meta name="description" content="Agende seu horário pelo Agendivo sem precisar instalar o aplicativo." />
+  <title>Agendivo</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="app">
+    <section class="loading">
+      <div>
+        <div class="mark">A✦</div>
+        <p>Carregando o Agendivo...</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="bookingSheet" class="sheet-backdrop" aria-hidden="true">
+    <section class="sheet" role="dialog" aria-modal="true" aria-label="Agendar horário">
+      <div class="handle"></div>
+      <div class="sheet-top">
+        <h2>Agendar horário</h2>
+        <button class="close" id="closeSheet" aria-label="Fechar">×</button>
+      </div>
+
+      <div class="steps">
+        <i class="step-dot active"></i>
+        <i class="step-dot"></i>
+        <i class="step-dot"></i>
+        <i class="step-dot"></i>
+      </div>
+
+      <div class="step active" data-step="0">
+        <h3>1. Escolha o serviço</h3>
+        <div id="serviceChoices" class="choices"></div>
+      </div>
+
+      <div class="step" data-step="1">
+        <h3>2. Quem vai atender?</h3>
+        <div id="professionalChoices" class="choices"></div>
+      </div>
+
+      <div class="step" data-step="2">
+        <h3>3. Escolha o dia e horário</h3>
+        <div id="days" class="days"></div>
+        <div style="height:14px"></div>
+        <div id="slots" class="slots"></div>
+      </div>
+
+      <div class="step" data-step="3">
+        <h3>4. Seus dados</h3>
+        <div class="form">
+          <label class="field">Seu nome
+            <input id="guestName" autocomplete="name" placeholder="Como podemos te chamar?" />
+          </label>
+          <label class="field">WhatsApp
+            <input id="guestPhone" inputmode="tel" autocomplete="tel" placeholder="(48) 99999-9999" />
+          </label>
+          <label class="field">Observação, se quiser
+            <textarea id="guestNotes" placeholder="Ex.: prefiro atendimento mais cedo"></textarea>
+          </label>
+        </div>
+        <div id="summary" class="summary"></div>
+      </div>
+
+      <div class="step" data-step="4">
+        <div class="success">
+          <div class="success-mark">✓</div>
+          <p class="eyebrow">AGENDAMENTO CONFIRMADO</p>
+          <h2>Está marcado.</h2>
+          <p id="successMessage"></p>
+          <div id="successSummary" class="summary"></div>
+          <button class="primary" style="margin-top:16px" id="finishBooking">Fechar</button>
+        </div>
+      </div>
+
+      <div id="sheetActions" class="sheet-actions">
+        <button class="secondary" id="backStep">Voltar</button>
+        <button class="primary" id="nextStep">Continuar</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
