@@ -193,10 +193,23 @@ public class MainActivity extends Activity {
             c.addView(text(task.person + "  •  " + daysText(task.daysMask),
                     13, MUTED, false), top(dp(4)));
 
+            LinearLayout actions = new LinearLayout(this);
+            actions.setOrientation(LinearLayout.HORIZONTAL);
+
+            Button edit = secondary("Editar");
+            edit.setOnClickListener(v -> showEditTaskDialog(task));
+            actions.addView(edit, new LinearLayout.LayoutParams(
+                    0, dp(48), 1f));
+
             Button del = secondary("Excluir");
             del.setTextColor(DANGER);
             del.setOnClickListener(v -> confirmDeleteTask(task));
-            c.addView(del, top(dp(10)));
+            LinearLayout.LayoutParams deleteParams = new LinearLayout.LayoutParams(
+                    0, dp(48), 1f);
+            deleteParams.leftMargin = dp(8);
+            actions.addView(del, deleteParams);
+
+            c.addView(actions, top(dp(10)));
             content.addView(c, bottom(dp(10)));
         }
     }
@@ -271,6 +284,98 @@ public class MainActivity extends Activity {
                             title,
                             String.valueOf(spinner.getSelectedItem()),
                             mask));
+                    store.saveTasks(tasks);
+                    NotificationScheduler.scheduleNext(this);
+                    dialog.dismiss();
+                    showSection(1);
+                }));
+
+        dialog.show();
+    }
+
+    private void showEditTaskDialog(Task task) {
+        List<String> people = store.getPeople();
+        if (people.isEmpty()) {
+            Toast.makeText(this, "Adicione uma pessoa primeiro.", Toast.LENGTH_SHORT).show();
+            showSection(2);
+            return;
+        }
+
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+
+        EditText taskName = new EditText(this);
+        taskName.setHint("Ex.: lavar a louça");
+        taskName.setText(task.title);
+        taskName.setTextSize(17);
+        box.addView(taskName, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(56)));
+
+        box.addView(text("Responsável", 13, MUTED, true), top(dp(12)));
+
+        Spinner spinner = new Spinner(this);
+        spinner.setAdapter(new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_dropdown_item, people));
+        int selectedPerson = 0;
+        for (int i = 0; i < people.size(); i++) {
+            if (people.get(i).equals(task.person)) {
+                selectedPerson = i;
+                break;
+            }
+        }
+        spinner.setSelection(selectedPerson);
+        box.addView(spinner, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(54)));
+
+        box.addView(text("Dias da semana", 13, MUTED, true), top(dp(12)));
+
+        String[] dayNames = {"Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"};
+        LinearLayout days = new LinearLayout(this);
+        days.setOrientation(LinearLayout.VERTICAL);
+        CheckBox[] checks = new CheckBox[7];
+
+        for (int i = 0; i < 7; i++) {
+            checks[i] = new CheckBox(this);
+            checks[i].setText(dayNames[i]);
+            checks[i].setTextSize(15);
+            checks[i].setChecked((task.daysMask & (1 << i)) != 0);
+            days.addView(checks[i]);
+        }
+        box.addView(days);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Editar tarefa")
+                .setView(box)
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Salvar", null)
+                .create();
+
+        dialog.setOnShowListener(ignored ->
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                    String title = taskName.getText().toString().trim();
+                    if (title.isEmpty()) {
+                        taskName.setError("Digite o nome da tarefa.");
+                        return;
+                    }
+
+                    int mask = 0;
+                    for (int i = 0; i < 7; i++) if (checks[i].isChecked()) mask |= (1 << i);
+                    if (mask == 0) {
+                        Toast.makeText(this, "Escolha pelo menos um dia.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String person = String.valueOf(spinner.getSelectedItem());
+                    List<Task> tasks = store.getTasks();
+                    for (int i = 0; i < tasks.size(); i++) {
+                        Task current = tasks.get(i);
+                        if (current.id.equals(task.id)) {
+                            tasks.set(i, new Task(task.id, title, person, mask));
+                            break;
+                        }
+                    }
+
                     store.saveTasks(tasks);
                     NotificationScheduler.scheduleNext(this);
                     dialog.dismiss();
