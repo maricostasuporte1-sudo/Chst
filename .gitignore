@@ -1,0 +1,19 @@
+# Godot generated files
+.godot/
+.import/
+.export/
+*.translation
+
+# Local builds and debug artifacts
+build/
+dist/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
